@@ -1,24 +1,14 @@
-# Variables
 CXX = clang++
-CXXFLAGS = -std=c++17 -I/opt/homebrew/include
-LDFLAGS = -L/opt/homebrew/lib -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
+CXXFLAGS = -std=c++17 -Wall -Wextra
+SFML_DIR = /opt/homebrew
+INCLUDES = -I$(SFML_DIR)/include
+LIBS = -L$(SFML_DIR)/lib -lsfml-graphics -lsfml-window -lsfml-system
 
-# Target name
-TARGET = DyingAstronaut
+main: main.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) main.cpp -o main $(LIBS)
+	./main
 
-# Source files
-SRC = main.cpp
-
-# Default rule
-all: $(TARGET)
-
-$(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
-
-# Rule to run the game
-run: all
-	./$(TARGET)
-
-# Rule to clean up
 clean:
-	rm -f $(TARGET)
+	rm -f main
+
+.PHONY: clean
