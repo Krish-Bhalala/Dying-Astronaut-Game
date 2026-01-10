@@ -1,22 +1,24 @@
 #ifndef OBSTACLE_HPP
 #define OBSTACLE_HPP
 
+#include "Constants.h"
 #include <SFML/Graphics.hpp>
 
 class Obstacle {
 public:
   sf::CircleShape shape;
   sf::Vector2f velocity;
+  sf::Vector2f maxVelocity;
   float radius;
 
-  Obstacle(sf::Vector2f pos, sf::Vector2f vel, float r)
-      : velocity(vel), radius(r) {
+  Obstacle(sf::Vector2f pos, sf::Vector2f vel, sf::Vector2f maxVel, float r)
+      : velocity(vel), maxVelocity(maxVel), radius(r) {
     shape.setRadius(radius);
     shape.setOrigin({radius, radius});
-    shape.setFillColor(sf::Color(100, 100, 120)); // Stony grey
+    shape.setFillColor(OBSTACLE_COLOR);
     shape.setPosition(pos);
-    shape.setOutlineThickness(2.f);
-    shape.setOutlineColor(sf::Color(150, 150, 150));
+    shape.setOutlineThickness(OBSTACLE_OUTLINE_THICKNESS);
+    shape.setOutlineColor(OBSTACLE_OUTLINE_COLOR);
   }
 
   void update(float dt) {
@@ -25,12 +27,12 @@ public:
     // Screen wrap
     sf::Vector2f pos = shape.getPosition();
     if (pos.x < 0)
-      pos.x = 800;
-    if (pos.x > 800)
+      pos.x = WINDOW_WIDTH;
+    if (pos.x > WINDOW_WIDTH)
       pos.x = 0;
     if (pos.y < 0)
-      pos.y = 600;
-    if (pos.y > 600)
+      pos.y = WINDOW_HEIGHT;
+    if (pos.y > WINDOW_HEIGHT)
       pos.y = 0;
     shape.setPosition(pos);
   }

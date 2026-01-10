@@ -2,6 +2,7 @@
 #define HUD_HPP
 
 #include "Astronaut.hpp"
+#include "Constants.h"
 #include <SFML/Graphics.hpp>
 
 class HUD {
@@ -11,21 +12,24 @@ class HUD {
 public:
   HUD() {
     // Oxygen Bar at top
-    oxygenBar.setPosition({10.f, 10.f});
-    oxygenBar.setFillColor(sf::Color::Red);
+    oxygenBar.setPosition({HUD_OXYGEN_BAR_POS_X, HUD_OXYGEN_BAR_POS_Y});
+    oxygenBar.setFillColor(HUD_OXYGEN_BAR_COLOR);
 
-    // Thrust Bar below astronaut (or static at bottom)
-    thrustBar.setFillColor(sf::Color::Yellow);
+    // Thrust Bar below astronaut
+    thrustBar.setFillColor(HUD_THRUST_BAR_COLOR);
   }
 
   void update(const Astronaut &player) {
     // Map 0-100 to 200px width
-    oxygenBar.setSize({player.oxygen * 2.0f, 10.f});
+    oxygenBar.setSize(
+        {player.oxygen * HUD_OXYGEN_BAR_WIDTH_SCALE, HUD_OXYGEN_BAR_HEIGHT});
 
     // Position thrust bar slightly below the player
-    thrustBar.setPosition({player.body.getPosition().x - 25.f,
-                           player.body.getPosition().y + 25.f});
-    thrustBar.setSize({player.thrustCapacity * 0.5f, 5.f});
+    thrustBar.setPosition(
+        {player.body.getPosition().x + HUD_THRUST_BAR_OFFSET_X,
+         player.body.getPosition().y + HUD_THRUST_BAR_OFFSET_Y});
+    thrustBar.setSize({player.thrustCapacity * HUD_THRUST_BAR_WIDTH_SCALE,
+                       HUD_THRUST_BAR_HEIGHT});
   }
 
   void draw(sf::RenderWindow &window) {

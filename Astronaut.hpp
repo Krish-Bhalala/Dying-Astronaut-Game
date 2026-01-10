@@ -1,11 +1,9 @@
 #ifndef ASTRONAUT_HPP
 #define ASTRONAUT_HPP
 
+#include "Constants.h"
 #include <SFML/Graphics.hpp>
 #include <cmath>
-
-#define DEFAULT_ROTATION_SPEED 150.0f // Degrees per second
-#define DEFAULT_THRUST_POWER 300.0f
 
 class Astronaut {
 public:
@@ -14,28 +12,30 @@ public:
 
   // Physics
   float angle = 0.0f;
-  float rotationSpeed = DEFAULT_ROTATION_SPEED;
-  sf::Vector2f velocity{0.f, 0.f};          // Current movement vector
-  float thrustPower = DEFAULT_THRUST_POWER; // How fast we accelerate
+  float rotationSpeed = ROTATION_SPEED;
+  sf::Vector2f velocity{0.f, 0.f};  // Current movement vector
+  float thrustPower = THRUST_POWER; // How fast we accelerate
 
   // Survival Stats
-  float oxygen = 100.0f;
-  float oxygenDrainRate = 1.f;
-  float thrustCapacity = 100.0f;
-  float thrustDrainRate = 10.f;
+  float oxygen = OXYGEN_MAX;
+  float oxygenDrainRate = OXYGEN_DRAIN_NORMAL;
+  float thrustCapacity = THRUST_CAPACITY_MAX;
+  float thrustDrainRate = THRUST_DRAIN_RATE;
   bool isDead = false;
 
   Astronaut() {
     // Astronaut Body
-    body.setRadius(15.f);
-    body.setOrigin({15.f, 15.f});
-    body.setFillColor(sf::Color::White);
-    body.setPosition({400.f, 300.f});
+    body.setRadius(ASTRO_RADIUS);
+    body.setOrigin({ASTRO_RADIUS, ASTRO_RADIUS});
+    body.setFillColor(ASTRO_BODY_COLOR);
+    body.setPosition({ASTRO_START_POS_X, ASTRO_START_POS_Y});
 
     // Directional Pointer (The "Arrow")
-    pointer.setSize({40.f, 4.f});
-    pointer.setOrigin({0.f, 2.f}); // Rotate around the start of the rectangle
-    pointer.setFillColor(sf::Color::Cyan);
+    pointer.setSize({POINTER_WIDTH, POINTER_HEIGHT});
+    pointer.setOrigin(
+        {POINTER_ORIGIN_X,
+         POINTER_ORIGIN_Y}); // Rotate around the start of the rectangle
+    pointer.setFillColor(POINTER_COLOR_IDLE);
   }
 
   void update(float dt, bool isThrusting) {
@@ -43,29 +43,27 @@ public:
       return;
 
     // Oxygen Drain
-    if (oxygen > 0)
-      oxygen -= dt * oxygenDrainRate;
-    else
-      isDead = true;
+    deplet_oxygen(dt * oxygenDrainRate);
 
     // Thrust Logic with Decay
-    if (thrustCapacity <= 0) {
-      kill_thruster();
-    } else if (isThrusting) {
-      pointer.setFillColor(sf::Color::Red);
-      float rad = angle * (3.14159f / 180.0f);
-      sf::Vector2f thrustDir{std::cos(rad), std::sin(rad)};
+    if (has_thrust()) {
+      if (isThrusting) {
+        pointer.setFillColor(POINTER_COLOR_THRUST);
+        float rad = angle * (3.14159f / 180.0f);
+        sf::Vector2f thrustDir{std::cos(rad), std::sin(rad)};
 
-      // Apply thrust scaled by current capacity
-      velocity += thrustDir * (thrustPower * (thrustCapacity / 100.0f)) * dt;
+        // Apply thrust scaled by current capacity
+        velocity += thrustDir *
+                    (thrustPower * (thrustCapacity / THRUST_CAPACITY_MAX)) * dt;
 
-      // Permanent engine wear (0.5% per second of thrust)
-      thrustCapacity -= thrustDrainRate * dt;
-    } else if (!isThrusting) {
-      angle += rotationSpeed * dt;
-      if (angle > 360.f)
-        angle -= 360.f;
-      pointer.setFillColor(sf::Color::Cyan);
+        // Permanent engine wear
+        deplet_thrust(thrustDrainRate * dt);
+      } else {
+        angle += rotationSpeed * dt;
+        if (angle > 360.f)
+          angle -= 360.f;
+        pointer.setFillColor(POINTER_COLOR_IDLE);
+      }
     }
     // Apply Velocity to Position (Inertia)
     body.move(velocity * dt);
@@ -73,12 +71,12 @@ public:
     // Screen Wrapping
     sf::Vector2f pos = body.getPosition();
     if (pos.x < 0)
-      pos.x = 800;
-    if (pos.x > 800)
+      pos.x = WINDOW_WIDTH;
+    if (pos.x > WINDOW_WIDTH)
       pos.x = 0;
     if (pos.y < 0)
-      pos.y = 600;
-    if (pos.y > 600)
+      pos.y = WINDOW_HEIGHT;
+    if (pos.y > WINDOW_HEIGHT)
       pos.y = 0;
     body.setPosition(pos);
 
@@ -90,12 +88,28 @@ public:
 
   void kill_thruster() {
     thrustCapacity = 0;
-    pointer.setFillColor(sf::Color::Black);
-    pointer.setOutlineColor(sf::Color::White);
+    pointer.setFillColor(POINTER_COLOR_DEAD);
+    pointer.setOutlineColor(POINTER_OUTLINE_COLOR);
     pointer.setOutlineThickness(1.f);
     rotationSpeed = 0.f;
     thrustPower = 0.f;
   }
+
+  void deplet_oxygen(float value) {
+    if (oxygen > 0)
+      oxygen -= value;
+    if (oxygen <= 0)
+      isDead = true;
+  }
+
+  void deplet_thrust(float value) {
+    if (thrustCapacity > 0)
+      thrustCapacity -= value;
+    if (thrustCapacity <= 0)
+      kill_thruster();
+  }
+
+  bool has_thrust() { return thrustCapacity > 0; }
 
   void draw(sf::RenderWindow &window) {
     window.draw(pointer);
