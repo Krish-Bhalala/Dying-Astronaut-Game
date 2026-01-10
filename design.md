@@ -54,39 +54,7 @@ To keep the screen clean, use non-intrusive geometric indicators:
 
 ---
 
-### 5. Code Structure (C++ Classes)
+### 5. Edge Case Handling
 
-```cpp
-// --- Proposed Structural Organization ---
-
-class Entity {
-    sf::Vector2f position, velocity;
-    virtual void update(float dt) = 0;
-};
-
-class Astronaut : public Entity {
-    float oxygen, thrustPower, rotationAngle;
-    bool isThrusting;
-    void applyThrust(float dt); // Updates velocity based on rotationAngle
-    void handleInput();         // Logic for locking/unlocking rotation
-};
-
-class ObstacleManager {
-    std::vector<Debris> activeDebris;
-    void spawnDebris();         // Periodically adds moving obstacles
-    void resolveCollisions();   // Physics check: Astronaut vs Debris
-};
-
-class GameState {
-    enum { START, PLAYING, SUCCESS, DEAD } status;
-    void checkWinCondition();   // Distance check to Healthy Ship
-};
-
-```
-
-### 6. Edge Case Handling
-
-* **Screen Boundary:** If the astronaut flies out of bounds, do you wrap them around (Pac-Man style) or treat it as a "lost in deep space" death? (Recommended: Wrapping keeps the focus on reflexes).
-* **Zero Velocity:** If a player perfectly cancels their momentum and stops, the arrow must resume rotation immediately so they aren't stuck.
-
-**Would you like me to provide the specific C++ math for the "Elastic Collision" logic to ensure the physics feel authentic when hitting debris?**
+* **Screen Boundary:** If the astronaut flies out of bounds, do you wrap them around (Pac-Man style) or treat it as a "lost in deep space" death? (Wrapping keeps the focus on reflexes).
+* **Zero Velocity:** If a player perfectly cancels their momentum then it stops
