@@ -12,10 +12,18 @@ public:
   sf::CircleShape body;
   sf::RectangleShape pointer;
 
+  // Physics
   float angle = 0.0f;
   float rotationSpeed = DEFAULT_ROTATION_SPEED;
   sf::Vector2f velocity{0.f, 0.f};          // Current movement vector
   float thrustPower = DEFAULT_THRUST_POWER; // How fast we accelerate
+
+  // Survival Stats
+  float oxygen = 100.0f;
+  float oxygenDrainRate = 1.f;
+  float thrustCapacity = 100.0f;
+  float thrustDrainRate = 10.f;
+  bool isDead = false;
 
   Astronaut() {
     // Astronaut Body
@@ -31,20 +39,33 @@ public:
   }
 
   void update(float dt, bool isThrusting) {
-    // If key NOT pressed, rotate. If pressed, "Lock" direction.
-    if (!isThrusting) {
-      // Keep the direction arrow rotating
-      angle += rotationSpeed * dt;
-      if (angle > 360.f)
-        angle -= 360.f;
-    } else {
-      // Thrust Logic (Inertia)
-      // Convert degrees to radians for cos/sin
+    if (isDead)
+      return;
+
+    // Oxygen Drain
+    if (oxygen > 0)
+      oxygen -= dt * oxygenDrainRate;
+    else
+      isDead = true;
+
+    // Thrust Logic with Decay
+    if (thrustCapacity <= 0) {
+      kill_thruster();
+    } else if (isThrusting) {
+      pointer.setFillColor(sf::Color::Red);
       float rad = angle * (3.14159f / 180.0f);
       sf::Vector2f thrustDir{std::cos(rad), std::sin(rad)};
 
-      // Add to velocity over time
-      velocity += thrustDir * thrustPower * dt;
+      // Apply thrust scaled by current capacity
+      velocity += thrustDir * (thrustPower * (thrustCapacity / 100.0f)) * dt;
+
+      // Permanent engine wear (0.5% per second of thrust)
+      thrustCapacity -= thrustDrainRate * dt;
+    } else if (!isThrusting) {
+      angle += rotationSpeed * dt;
+      if (angle > 360.f)
+        angle -= 360.f;
+      pointer.setFillColor(sf::Color::Cyan);
     }
     // Apply Velocity to Position (Inertia)
     body.move(velocity * dt);
@@ -52,9 +73,7 @@ public:
     // Screen Wrapping
     sf::Vector2f pos = body.getPosition();
     if (pos.x < 0)
-      pos.x = 800;
-    if (pos.x > 800)
-      pos.x = 0;
+      isDead = true;
     if (pos.y < 0)
       pos.y = 600;
     if (pos.y > 600)
@@ -62,7 +81,18 @@ public:
     body.setPosition(pos);
 
     pointer.setPosition(body.getPosition());
-    pointer.setRotation(sf::degrees(angle));
+    // make the arrow point in the opposite direction of the velocity for
+    // intutitve gameplay
+    pointer.setRotation(sf::degrees(angle + 180.0f));
+  }
+
+  void kill_thruster() {
+    thrustCapacity = 0;
+    pointer.setFillColor(sf::Color::Black);
+    pointer.setOutlineColor(sf::Color::White);
+    pointer.setOutlineThickness(1.f);
+    rotationSpeed = 0.f;
+    thrustPower = 0.f;
   }
 
   void draw(sf::RenderWindow &window) {

@@ -1,4 +1,5 @@
 #include "Astronaut.hpp"
+#include "HUD.hpp"
 #include <SFML/Graphics.hpp>
 
 int main() {
@@ -7,6 +8,7 @@ int main() {
   window.setFramerateLimit(60);
 
   Astronaut player;
+  HUD hud;
   sf::Clock clock;
 
   while (window.isOpen()) {
@@ -20,9 +22,13 @@ int main() {
     bool isSpaceHeld = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space);
 
     player.update(dt, isSpaceHeld);
+    hud.update(player);
 
-    window.clear(sf::Color(10, 10, 25));
+    window.clear(sf::Color(5, 5, 15));
+
     player.draw(window);
+    hud.draw(window);
+
     window.display();
   }
   return 0;

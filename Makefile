@@ -4,7 +4,7 @@ SFML_DIR = /opt/homebrew
 INCLUDES = -I$(SFML_DIR)/include
 LIBS = -L$(SFML_DIR)/lib -lsfml-graphics -lsfml-window -lsfml-system
 
-main: main.cpp
+main: main.cpp Astronaut.hpp HUD.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) main.cpp -o main $(LIBS)
 	./main
 
