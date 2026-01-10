@@ -73,7 +73,9 @@ public:
     // Screen Wrapping
     sf::Vector2f pos = body.getPosition();
     if (pos.x < 0)
-      isDead = true;
+      pos.x = 800;
+    if (pos.x > 800)
+      pos.x = 0;
     if (pos.y < 0)
       pos.y = 600;
     if (pos.y > 600)
