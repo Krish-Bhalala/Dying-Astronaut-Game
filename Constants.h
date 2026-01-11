@@ -32,6 +32,10 @@
 #define OXYGEN_DRAIN_COLLISION 0.05f
 #define THRUST_CAPACITY_MAX 100.0f
 #define THRUST_DRAIN_RATE 10.0f
+#define ASTRO_MASS 1.0f
+#define ASTRO_INERTIA 500.0f       // Rotational resistance
+#define ANGULAR_DAMPING 0.99f      // Friction for rotation
+#define MIN_ANGULAR_VELOCITY 40.0f // Minimum rotation to prevent stall
 
 // HUD
 #define HUD_OXYGEN_BAR_POS_X 10.0f
@@ -61,10 +65,12 @@
 #define NUM_OBSTACLES 10
 #define MIN_OBSTACLE_RADIUS 20
 #define MAX_OBSTACLE_RADIUS 40
+#define OBSTACLE_MASS_SCALE 0.1f // Mass scales with radius-squared
 
 // Physics / Collision constants
 #define COLLISION_BOUNCE_FACTOR 0.4f
 #define COLLISION_KICK_FACTOR 0.5f
+#define COLLISION_FRICTION 0.2f // Tangential impulse transfer
 
 // Audio stream identifiers
 #define SOUND_BACKGROUND "assets/sounds/space_background.mp3"

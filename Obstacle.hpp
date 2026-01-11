@@ -10,11 +10,19 @@ public:
   std::unique_ptr<sf::Sprite> sprite;
   sf::Vector2f velocity;
   float radius;
+  float angularVelocity;
+  float mass;
 
   Obstacle(const sf::Texture &texture, sf::Vector2f pos, sf::Vector2f vel,
            float r)
       : velocity(vel), radius(r) {
     sprite = std::make_unique<sf::Sprite>(texture);
+
+    // Randomize initial angular velocity [-60, 60] deg/s
+    angularVelocity = static_cast<float>((std::rand() % 120) - 60);
+
+    // Mass scales with area (radius squared)
+    mass = radius * radius * OBSTACLE_MASS_SCALE;
 
     // Normalize sprite scale to radius
     sf::Vector2u texSize = texture.getSize();
@@ -27,8 +35,8 @@ public:
   void update(float dt) {
     sprite->move(velocity * dt);
 
-    // Constant angular velocity
-    sprite->rotate(sf::degrees((rand() % 30) * dt));
+    // Constant angular velocity integration
+    sprite->rotate(sf::degrees(angularVelocity * dt));
 
     // Periodic boundary conditions
     sf::Vector2f pos = sprite->getPosition();

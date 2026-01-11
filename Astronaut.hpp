@@ -27,6 +27,9 @@ public:
 
   int currentShipState = 0; // 0=healthy, 1=damaged, 2=broken
   bool isCurrentlyThrusting = false;
+  float angularVelocity = static_cast<float>((rand() % 100) + 50);
+  float mass = ASTRO_MASS;
+  float inertia = ASTRO_INERTIA;
 
   Astronaut() {
     if (!texHealthy.loadFromFile(TEX_SHIP_HEALTHY)) {
@@ -96,8 +99,24 @@ public:
 
     updateTexture();
 
-    // Impulse logic with engine degradation
+    // Physics integration
     if (has_thrust()) {
+      // Rotation persists regardless of thrust
+      angle += angularVelocity * dt;
+      if (angle > 360.f)
+        angle -= 360.f;
+      if (angle < 0.f)
+        angle += 360.f;
+
+      // Rotational damping
+      angularVelocity *= ANGULAR_DAMPING;
+
+      // Ensure minimum angular velocity to prevent player stalling
+      if (std::abs(angularVelocity) < MIN_ANGULAR_VELOCITY) {
+        angularVelocity = (angularVelocity >= 0) ? MIN_ANGULAR_VELOCITY
+                                                 : -MIN_ANGULAR_VELOCITY;
+      }
+
       if (isThrusting) {
         float rad = angle * (3.14159f / 180.0f);
         sf::Vector2f thrustDir{std::cos(rad), std::sin(rad)};
@@ -108,10 +127,6 @@ public:
 
         // Permanent engine wear
         deplet_thrust(thrustDrainRate * dt);
-      } else {
-        angle += rotationSpeed * dt;
-        if (angle > 360.f)
-          angle -= 360.f;
       }
     }
 
@@ -166,6 +181,7 @@ public:
 
     // Reset physics
     angle = 0.0f;
+    angularVelocity = static_cast<float>((rand() % 100) + 50);
     rotationSpeed = ROTATION_SPEED;
     velocity = {0.f, 0.f};
     thrustPower = THRUST_POWER;
@@ -266,6 +282,7 @@ public:
   void reset_state() {
     velocity = {0.f, 0.f};
     angle = 0.0f;
+    angularVelocity = static_cast<float>((rand() % 100) + 50);
     rotationSpeed = ROTATION_SPEED;
     thrustCapacity = THRUST_CAPACITY_MAX;
     thrustDrainRate = THRUST_DRAIN_RATE;

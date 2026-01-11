@@ -19,15 +19,66 @@ void handleCollision(Astronaut &a, Obstacle &o, AudioManager &audioMgr) {
     float overlap = minDistance - distance;
     a.body->move(normal * overlap);
 
-    // Dynamic resolution: inelastic impulse response
-    float dot = a.velocity.x * normal.x + a.velocity.y * normal.y;
-    a.velocity -= COLLISION_BOUNCE_FACTOR * dot * normal;
+    // Dynamic resolution: inelastic impact with rotational transfer
+    // Collision arm vectors from centers to impact point
+    sf::Vector2f rA = normal * a.getRadius();
+    sf::Vector2f rB = -normal * o.radius;
 
-    // Momentum transfer from obstacle velocity
-    a.velocity += o.velocity * COLLISION_KICK_FACTOR;
+    // Relative velocity at impact point (including angular components)
+    // v_rel = (vB + wB x rB) - (vA + wA x rA)
+    auto crossZ = [](float w, sf::Vector2f r) {
+      return sf::Vector2f(-w * r.y, w * r.x);
+    };
+    sf::Vector2f vA_total =
+        a.velocity + crossZ(a.angularVelocity * (3.14159f / 180.0f), rA);
+    sf::Vector2f vB_total =
+        o.velocity + crossZ(o.angularVelocity * (3.14159f / 180.0f), rB);
+    sf::Vector2f v_rel = vB_total - vA_total;
+
+    float rel_norm = v_rel.x * normal.x + v_rel.y * normal.y;
+
+    // Only resolve if objects are approaching
+    if (rel_norm < 0) {
+      // Linear impulse magnitude (simplified for circular friction-less feel,
+      // but we add tangential later)
+      float e = COLLISION_BOUNCE_FACTOR;
+      float j = -(1.0f + e) * rel_norm;
+      j /= (1.0f / a.mass + 1.0f / o.mass);
+
+      sf::Vector2f impulse = normal * j;
+
+      // Apply linear impulse
+      a.velocity -= impulse / a.mass;
+      o.velocity += impulse / o.mass;
+
+      // Tangential impulse (Friction/Torque transfer)
+      sf::Vector2f tangent{-normal.y, normal.x};
+      float rel_tan = v_rel.x * tangent.x + v_rel.y * tangent.y;
+      float jt = -rel_tan * COLLISION_FRICTION;
+      jt /= (1.0f / a.mass + 1.0f / o.mass);
+
+      sf::Vector2f frictionImpulse = tangent * jt;
+
+      // Apply torque: torque = r x impulse
+      auto cross2D = [](sf::Vector2f r, sf::Vector2f f) {
+        return r.x * f.y - r.y * f.x;
+      };
+
+      float torqueA = cross2D(rA, -frictionImpulse);
+      float torqueB = cross2D(rB, frictionImpulse);
+
+      // Convert torque to angular velocity change: dw = torque / inertia
+      // Astronaut has explicit inertia, Obstacles have simulated inertia (mr^2)
+      a.angularVelocity += (torqueA / a.inertia) * (180.0f / 3.14159f);
+      o.angularVelocity +=
+          (torqueB / (o.mass * o.radius * o.radius)) * (180.0f / 3.14159f);
+
+      // Momentum transfer from obstacle scale
+      a.velocity += o.velocity * COLLISION_KICK_FACTOR;
+    }
 
     float velocityMagnitude =
-        sqrt((a.velocity.x * a.velocity.x) + (a.velocity.y * a.velocity.y));
+        std::sqrt(a.velocity.x * a.velocity.x + a.velocity.y * a.velocity.y);
     if (velocityMagnitude > 10) {
       float oxygen_drain = velocityMagnitude * OXYGEN_DRAIN_COLLISION;
       a.deplet_oxygen(oxygen_drain);
