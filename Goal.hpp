@@ -12,19 +12,17 @@ public:
   sf::Texture texture;
   std::unique_ptr<sf::Sprite> sprite;
   bool isReached = false;
-  float rotationSpeed = 45.0f; // Slow spin for wormhole effect
+  float rotationSpeed = 45.0f; // Angular velocity for visual effect
 
   Goal() {
-    // Load wormhole texture FIRST
     if (!texture.loadFromFile(TEX_WORMHOLE)) {
       std::cerr << "Warning: Could not load " << TEX_WORMHOLE << std::endl;
     }
 
-    // NOW create sprite with loaded texture
     sprite = std::make_unique<sf::Sprite>(texture);
     sf::Vector2u texSize = texture.getSize();
 
-    // Scale to desired goal radius
+    // Normalize sprite dimensions
     float scale = (GOAL_RADIUS * 2.0f) / static_cast<float>(texSize.x);
     sprite->setScale({scale, scale});
     sprite->setOrigin({texSize.x / 2.0f, texSize.y / 2.0f});
@@ -32,7 +30,7 @@ public:
   }
 
   void update(float dt) {
-    // Rotate wormhole for visual effect
+    // Angular integration
     sprite->rotate(sf::degrees(rotationSpeed * dt));
   }
 

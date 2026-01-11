@@ -9,11 +9,11 @@
 
 class AudioManager {
 private:
-  // Music (for long looping tracks) - use optional since they may fail to load
+  // Long-duration looping audio buffers
   std::optional<sf::Music> backgroundMusic;
   std::optional<sf::Music> scaryBackgroundMusic;
 
-  // Sound buffers (must persist)
+  // Persistent audio sample buffers
   sf::SoundBuffer thrustBuffer;
   sf::SoundBuffer collisionBuffer;
   sf::SoundBuffer breathingBuffer;
@@ -22,13 +22,10 @@ private:
   sf::SoundBuffer victoryBuffer;
   sf::SoundBuffer warpBuffer;
   sf::SoundBuffer sosBuffer;
-  sf::SoundBuffer hullBreachBuffer;
   sf::SoundBuffer impactBuffer;
   sf::SoundBuffer metalImpactBuffer;
-  sf::SoundBuffer ouchBuffer;
 
-  // Sound instances - using unique_ptr since sf::Sound needs buffer at
-  // construction
+  // Audio source instances
   std::unique_ptr<sf::Sound> thrustSound;
   std::unique_ptr<sf::Sound> collisionSound;
   std::unique_ptr<sf::Sound> breathingSound;
@@ -37,10 +34,8 @@ private:
   std::unique_ptr<sf::Sound> victorySound;
   std::unique_ptr<sf::Sound> warpSound;
   std::unique_ptr<sf::Sound> sosSound;
-  std::unique_ptr<sf::Sound> hullBreachSound;
   std::unique_ptr<sf::Sound> impactSound;
   std::unique_ptr<sf::Sound> metalImpactSound;
-  std::unique_ptr<sf::Sound> ouchSound;
 
   bool isBreathingPlaying = false;
   bool isSosPlaying = false;
@@ -48,14 +43,13 @@ private:
 
 public:
   AudioManager() {
-    // Load background music
     backgroundMusic.emplace();
     if (!backgroundMusic->openFromFile(SOUND_BACKGROUND)) {
       std::cerr << "Warning: Could not load " << SOUND_BACKGROUND << std::endl;
       backgroundMusic.reset();
     } else {
       backgroundMusic->setLooping(true);
-      backgroundMusic->setVolume(30.0f);
+      backgroundMusic->setVolume(25.0f);
     }
 
     scaryBackgroundMusic.emplace();
@@ -65,10 +59,10 @@ public:
       scaryBackgroundMusic.reset();
     } else {
       scaryBackgroundMusic->setLooping(true);
-      scaryBackgroundMusic->setVolume(50.0f);
+      scaryBackgroundMusic->setVolume(35.0f);
     }
 
-    // Load sound buffers and create sounds
+    // Initialize sound buffers and sources
     if (thrustBuffer.loadFromFile(SOUND_THRUST_HISS)) {
       thrustSound = std::make_unique<sf::Sound>(thrustBuffer);
       thrustSound->setLooping(true);
@@ -92,13 +86,6 @@ public:
       std::cerr << "Warning: Could not load " << SOUND_BREATHING << std::endl;
     }
 
-    if (hullBreachBuffer.loadFromFile(SOUND_HULL_BREACH)) {
-      hullBreachSound = std::make_unique<sf::Sound>(hullBreachBuffer);
-      hullBreachSound->setVolume(40.0f);
-    } else {
-      std::cerr << "Warning: Could not load " << SOUND_HULL_BREACH << std::endl;
-    }
-
     if (impactBuffer.loadFromFile(SOUND_IMPACT)) {
       impactSound = std::make_unique<sf::Sound>(impactBuffer);
       impactSound->setVolume(40.0f);
@@ -112,13 +99,6 @@ public:
     } else {
       std::cerr << "Warning: Could not load " << SOUND_METAL_IMPACT
                 << std::endl;
-    }
-
-    if (ouchBuffer.loadFromFile(SOUND_OUCH)) {
-      ouchSound = std::make_unique<sf::Sound>(ouchBuffer);
-      ouchSound->setVolume(40.0f);
-    } else {
-      std::cerr << "Warning: Could not load " << SOUND_OUCH << std::endl;
     }
 
     if (deathScreamBuffer.loadFromFile(SOUND_DEATH_SCREAM)) {
@@ -183,15 +163,13 @@ public:
   void playCollision() {
     if (collisionSound) {
       collisionSound->play();
-      hullBreachSound->play();
       impactSound->play();
       metalImpactSound->play();
-      ouchSound->play();
     }
   }
 
   void updateBreathing(float oxygen) {
-    // Regular breathing when low oxygen
+    // Trigger rhythmic audio based on oxygen levels
     if (oxygen < LOW_OXYGEN_THRESHOLD && oxygen > CRITICAL_OXYGEN_THRESHOLD) {
       if (!isBreathingPlaying && breathingSound) {
         breathingSound->play();
@@ -204,13 +182,14 @@ public:
       }
     }
 
-    // SOS morse at critical oxygen levels
+    // Critical state: SOS modulation
     if (oxygen < CRITICAL_OXYGEN_THRESHOLD && oxygen > 0) {
       if (!isSosPlaying) {
         if (sosSound)
           sosSound->play();
         isSosPlaying = true;
-        // Switch to scary background
+
+        // Transition to high-tension audio stream
         if (backgroundMusic)
           backgroundMusic->stop();
         if (scaryBackgroundMusic && scaryBackgroundMusic->getStatus() !=

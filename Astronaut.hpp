@@ -4,39 +4,31 @@
 #include "Constants.h"
 #include <SFML/Graphics.hpp>
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <vector>
 
 class Astronaut {
 public:
-  // Textures for ship body
-  sf::Texture texHealthy;
-  sf::Texture texDamaged;
-  sf::Texture texBroken;
-
-  // Ship body sprite
+  sf::Texture texHealthy, texDamaged, texBroken;
   std::unique_ptr<sf::Sprite> body;
 
-  // Physics
-  float angle = 0.0f;
+  float angle = static_cast<float>(rand() % 360);
   float rotationSpeed = ROTATION_SPEED;
   sf::Vector2f velocity{0.f, 0.f};
   float thrustPower = THRUST_POWER;
 
-  // Survival Stats
   float oxygen = OXYGEN_MAX;
   float oxygenDrainRate = OXYGEN_DRAIN_NORMAL;
   float thrustCapacity = THRUST_CAPACITY_MAX;
   float thrustDrainRate = THRUST_DRAIN_RATE;
   bool isDead = false;
 
-  // Current texture state
   int currentShipState = 0; // 0=healthy, 1=damaged, 2=broken
   bool isCurrentlyThrusting = false;
 
   Astronaut() {
-    // Load textures for ship
     if (!texHealthy.loadFromFile(TEX_SHIP_HEALTHY)) {
       std::cerr << "Warning: Could not load " << TEX_SHIP_HEALTHY << std::endl;
     }
@@ -47,10 +39,8 @@ public:
       std::cerr << "Warning: Could not load " << TEX_SHIP_BROKEN << std::endl;
     }
 
-    // Create ship body sprite
     body = std::make_unique<sf::Sprite>(texHealthy);
 
-    // Setup body sprite
     sf::Vector2u texSize = texHealthy.getSize();
     float scale = (ASTRO_RADIUS * 2.0f) / static_cast<float>(texSize.x);
     body->setScale({scale, scale});
@@ -59,7 +49,7 @@ public:
   }
 
   void updateTexture() {
-    // Update ship texture based on oxygen
+    // Texture switching logic driven by oxygen levels
     int newState;
     if (oxygen > SHIP_HEALTHY_THRESHOLD) {
       newState = 0;
@@ -88,7 +78,7 @@ public:
         break;
       }
 
-      // Update origin for new texture
+      // Re-center origin for geometric consistency
       body->setOrigin({texSize.x / 2.0f, texSize.y / 2.0f});
       float scale = (ASTRO_RADIUS * 2.0f) / static_cast<float>(texSize.x);
       body->setScale({scale, scale});
@@ -99,22 +89,20 @@ public:
     if (isDead)
       return;
 
-    // Save thrusting state for drawing
     isCurrentlyThrusting = isThrusting && has_thrust();
 
-    // Oxygen Drain
+    // Temporal oxygen depletion
     deplet_oxygen(dt * oxygenDrainRate);
 
-    // Update texture based on oxygen
     updateTexture();
 
-    // Thrust Logic with Decay
+    // Impulse logic with engine degradation
     if (has_thrust()) {
       if (isThrusting) {
         float rad = angle * (3.14159f / 180.0f);
         sf::Vector2f thrustDir{std::cos(rad), std::sin(rad)};
 
-        // Apply thrust scaled by current capacity
+        // Apply force scaled by engine integrity
         velocity += thrustDir *
                     (thrustPower * (thrustCapacity / THRUST_CAPACITY_MAX)) * dt;
 
@@ -127,10 +115,10 @@ public:
       }
     }
 
-    // Apply Velocity to Position (Inertia)
+    // Integrate velocity to update position
     body->move(velocity * dt);
 
-    // Screen Wrapping
+    // Periodic boundary conditions
     sf::Vector2f pos = body->getPosition();
     if (pos.x < 0)
       pos.x = WINDOW_WIDTH;
@@ -142,8 +130,7 @@ public:
       pos.y = 0;
     body->setPosition(pos);
 
-    // Rotate the ship body to match thrust direction (pointing opposite to
-    // thrust for intuitive feel)
+    // Align sprite orientation with thrust vector
     body->setRotation(sf::degrees(angle + 180.0f));
   }
 
@@ -169,7 +156,7 @@ public:
 
   bool has_thrust() { return thrustCapacity > 0; }
 
-  // For collision detection
+  // Physics interface
   float getRadius() const { return ASTRO_RADIUS; }
   sf::Vector2f getPosition() const { return body->getPosition(); }
 
@@ -196,7 +183,7 @@ public:
     body->setRotation(sf::degrees(0.f));
   }
 
-  // Drawing thruster
+  // Render procedural engine exhaust
   void drawThruster(sf::RenderWindow &window) {
     if (!has_thrust())
       return;
@@ -206,7 +193,7 @@ public:
     float rad = rotatedAngle * (3.14159f / 180.0f);
     sf::Vector2f perpendicular(-std::sin(rad), std::cos(rad));
 
-    // 1. NOZZLE (Mechanical base)
+    // NOZZLE
     float nLen = 8.0f;
     float nWid = 6.0f;
     sf::ConvexShape nozzle;
@@ -226,7 +213,6 @@ public:
     window.draw(nozzle);
 
     if (isCurrentlyThrusting) {
-      // 2. POWERFUL THRUST (Highly distinct active state)
       float tRatio = thrustCapacity / THRUST_CAPACITY_MAX;
       float maxLen = POINTER_WIDTH * 1.5f * tRatio;
       float maxWid = 10.0f;
@@ -259,7 +245,7 @@ public:
         window.draw(plume);
       }
 
-      // Intense heat core
+      // High-intensity plasma core
       sf::ConvexShape core;
       core.setPointCount(3);
       core.setPoint(0, pos + perpendicular * (maxWid * 0.3f));
@@ -269,13 +255,24 @@ public:
       core.setFillColor(sf::Color::White);
       window.draw(core);
     } else {
-      // 3. MINIMAL IDLE (Cold state)
       sf::CircleShape dot(2.0f);
       dot.setOrigin({2.0f, 2.0f});
       dot.setPosition(pos + nOffset * 0.6f);
       dot.setFillColor(sf::Color(80, 80, 80, 100));
       window.draw(dot);
     }
+  }
+
+  void reset_state() {
+    velocity = {0.f, 0.f};
+    angle = 0.0f;
+    rotationSpeed = ROTATION_SPEED;
+    thrustCapacity = THRUST_CAPACITY_MAX;
+    thrustDrainRate = THRUST_DRAIN_RATE;
+    isDead = false;
+    currentShipState = 0;
+    body->setTexture(texHealthy);
+    body->setRotation(sf::degrees(0.f));
   }
 
   void draw(sf::RenderWindow &window) {

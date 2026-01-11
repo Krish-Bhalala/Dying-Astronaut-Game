@@ -11,14 +11,12 @@ public:
   sf::Vector2f velocity;
   float radius;
 
-  // Constructor takes a texture reference from main
   Obstacle(const sf::Texture &texture, sf::Vector2f pos, sf::Vector2f vel,
            float r)
       : velocity(vel), radius(r) {
-    // Create sprite AFTER texture is passed
     sprite = std::make_unique<sf::Sprite>(texture);
 
-    // Scale texture to fit radius
+    // Normalize sprite scale to radius
     sf::Vector2u texSize = texture.getSize();
     float scale = (radius * 2.0f) / static_cast<float>(texSize.x);
     sprite->setScale({scale, scale});
@@ -29,10 +27,10 @@ public:
   void update(float dt) {
     sprite->move(velocity * dt);
 
-    // Slow rotation for visual effect
-    sprite->rotate(sf::degrees(30.0f * dt));
+    // Constant angular velocity
+    sprite->rotate(sf::degrees((rand() % 30) * dt));
 
-    // Screen wrap
+    // Periodic boundary conditions
     sf::Vector2f pos = sprite->getPosition();
     if (pos.x < 0)
       pos.x = WINDOW_WIDTH;
