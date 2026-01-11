@@ -3,29 +3,37 @@
 
 #include "Constants.h"
 #include <SFML/Graphics.hpp>
+#include <memory>
 
 class Obstacle {
 public:
-  sf::CircleShape shape;
+  std::unique_ptr<sf::Sprite> sprite;
   sf::Vector2f velocity;
-  sf::Vector2f maxVelocity;
   float radius;
 
-  Obstacle(sf::Vector2f pos, sf::Vector2f vel, sf::Vector2f maxVel, float r)
-      : velocity(vel), maxVelocity(maxVel), radius(r) {
-    shape.setRadius(radius);
-    shape.setOrigin({radius, radius});
-    shape.setFillColor(OBSTACLE_COLOR);
-    shape.setPosition(pos);
-    shape.setOutlineThickness(OBSTACLE_OUTLINE_THICKNESS);
-    shape.setOutlineColor(OBSTACLE_OUTLINE_COLOR);
+  // Constructor takes a texture reference from main
+  Obstacle(const sf::Texture &texture, sf::Vector2f pos, sf::Vector2f vel,
+           float r)
+      : velocity(vel), radius(r) {
+    // Create sprite AFTER texture is passed
+    sprite = std::make_unique<sf::Sprite>(texture);
+
+    // Scale texture to fit radius
+    sf::Vector2u texSize = texture.getSize();
+    float scale = (radius * 2.0f) / static_cast<float>(texSize.x);
+    sprite->setScale({scale, scale});
+    sprite->setOrigin({texSize.x / 2.0f, texSize.y / 2.0f});
+    sprite->setPosition(pos);
   }
 
   void update(float dt) {
-    shape.move(velocity * dt);
+    sprite->move(velocity * dt);
+
+    // Slow rotation for visual effect
+    sprite->rotate(sf::degrees(30.0f * dt));
 
     // Screen wrap
-    sf::Vector2f pos = shape.getPosition();
+    sf::Vector2f pos = sprite->getPosition();
     if (pos.x < 0)
       pos.x = WINDOW_WIDTH;
     if (pos.x > WINDOW_WIDTH)
@@ -34,10 +42,13 @@ public:
       pos.y = WINDOW_HEIGHT;
     if (pos.y > WINDOW_HEIGHT)
       pos.y = 0;
-    shape.setPosition(pos);
+    sprite->setPosition(pos);
   }
 
-  void draw(sf::RenderWindow &window) { window.draw(shape); }
+  sf::Vector2f getPosition() const { return sprite->getPosition(); }
+  float getRadius() const { return radius; }
+
+  void draw(sf::RenderWindow &window) { window.draw(*sprite); }
 };
 
 #endif

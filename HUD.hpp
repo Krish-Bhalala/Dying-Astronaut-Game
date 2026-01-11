@@ -26,8 +26,8 @@ public:
 
     // Position thrust bar slightly below the player
     thrustBar.setPosition(
-        {player.body.getPosition().x + HUD_THRUST_BAR_OFFSET_X,
-         player.body.getPosition().y + HUD_THRUST_BAR_OFFSET_Y});
+        {player.body->getPosition().x + HUD_THRUST_BAR_OFFSET_X,
+         player.body->getPosition().y + HUD_THRUST_BAR_OFFSET_Y});
     thrustBar.setSize({player.thrustCapacity * HUD_THRUST_BAR_WIDTH_SCALE,
                        HUD_THRUST_BAR_HEIGHT});
   }

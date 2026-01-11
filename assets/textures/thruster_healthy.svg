@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40">
+  <!-- Radial gradient for glowing thrust effect -->
+  <defs>
+    <!-- Main thrust glow - cyan/blue energy -->
+    <radialGradient id="thrustGlow" cx="0%" cy="50%" r="100%">
+      <stop offset="0%" stop-color="#00FFFF" stop-opacity="1"/>
+      <stop offset="40%" stop-color="#00AAFF" stop-opacity="0.8"/>
+      <stop offset="70%" stop-color="#0066FF" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0033AA" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Inner hot core -->
+    <radialGradient id="hotCore" cx="0%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="30%" stop-color="#00FFFF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Outer energy ring for spinning effect -->
+    <linearGradient id="energyRing" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00FFFF" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0088FF" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer exhaust cone - looks good spinning -->
+  <ellipse cx="40" cy="20" rx="38" ry="18" fill="url(#thrustGlow)"/>
+  
+  <!-- Mid layer exhaust -->
+  <ellipse cx="30" cy="20" rx="28" ry="12" fill="url(#thrustGlow)" opacity="0.7"/>
+  
+  <!-- Inner bright core -->
+  <ellipse cx="15" cy="20" rx="14" ry="8" fill="url(#hotCore)"/>
+  
+  <!-- Central energy point -->
+  <circle cx="5" cy="20" r="5" fill="#FFFFFF" opacity="0.9"/>
+  
+  <!-- Spinning energy lines - these create the rotation visual -->
+  <line x1="5" y1="20" x2="75" y2="8" stroke="url(#energyRing)" stroke-width="2" opacity="0.6"/>
+  <line x1="5" y1="20" x2="75" y2="32" stroke="url(#energyRing)" stroke-width="2" opacity="0.6"/>
+  <line x1="5" y1="20" x2="70" y2="20" stroke="url(#energyRing)" stroke-width="3" opacity="0.8"/>
+</svg>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40">
+  <!-- Radial gradient for damaged/weak thrust effect -->
+  <defs>
+    <!-- Weak thrust glow - orange/red struggling energy -->
+    <radialGradient id="weakGlow" cx="0%" cy="50%" r="100%">
+      <stop offset="0%" stop-color="#FF6600" stop-opacity="0.7"/>
+      <stop offset="40%" stop-color="#FF3300" stop-opacity="0.5"/>
+      <stop offset="70%" stop-color="#AA0000" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#550000" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Flickering core -->
+    <radialGradient id="flickerCore" cx="0%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#FFAA00" stop-opacity="0.8"/>
+      <stop offset="30%" stop-color="#FF6600" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Damaged energy -->
+    <linearGradient id="damagedRing" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF6600" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#FFAA00" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#AA3300" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Smaller, weaker outer exhaust -->
+  <ellipse cx="30" cy="20" rx="28" ry="14" fill="url(#weakGlow)"/>
+  
+  <!-- Flickering mid layer -->
+  <ellipse cx="20" cy="20" rx="18" ry="8" fill="url(#flickerCore)" opacity="0.6"/>
+  
+  <!-- Dim inner core -->
+  <ellipse cx="10" cy="20" rx="9" ry="5" fill="url(#flickerCore)"/>
+  
+  <!-- Weak central point -->
+  <circle cx="5" cy="20" r="4" fill="#FFAA00" opacity="0.6"/>
+  
+  <!-- Broken/flickering energy lines -->
+  <line x1="5" y1="20" x2="50" y2="10" stroke="url(#damagedRing)" stroke-width="1.5" opacity="0.4" stroke-dasharray="4,3"/>
+  <line x1="5" y1="20" x2="55" y2="30" stroke="url(#damagedRing)" stroke-width="1.5" opacity="0.4" stroke-dasharray="4,3"/>
+  <line x1="5" y1="20" x2="45" y2="20" stroke="url(#damagedRing)" stroke-width="2" opacity="0.5"/>
+</svg>
