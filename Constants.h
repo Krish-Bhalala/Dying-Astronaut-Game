@@ -29,9 +29,9 @@
 #define THRUST_POWER 300.0f
 #define OXYGEN_MAX 100.0f
 #define OXYGEN_DRAIN_NORMAL 1.0f
-#define OXYGEN_DRAIN_COLLISION 0.05f
+#define OXYGEN_DRAIN_COLLISION 0.005f
 #define THRUST_CAPACITY_MAX 100.0f
-#define THRUST_DRAIN_RATE 10.0f
+#define THRUST_DRAIN_RATE 20.0f
 #define ASTRO_MASS 1.0f
 #define ASTRO_INERTIA 500.0f       // Rotational resistance
 #define ANGULAR_DAMPING 0.99f      // Friction for rotation

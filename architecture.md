@@ -1,51 +1,48 @@
 ```mermaid
 graph TB
     subgraph "Game Loop (main.cpp)"
-        A[Initialize SFML Window]
-        B[Process Input]
-        C[Update Physics]
-        D[Check Collisions]
-        E[Render Frame]
-        F{Game Running?}
+        A[Initialize Window & Assets]
+        B[Process Input: SPACE/S/R]
+        C[Update Physics: dt integration]
+        D[Handle Collisions: Impulse & Momentum]
+        E[Render Framework]
+        F{Game State?}
         A --> B
         B --> C
         C --> D
         D --> E
         E --> F
-        F -->|Yes| B
-        F -->|No| G[Cleanup & Exit]
+        F -->|Running| B
+        F -->|Reset| A
     end
     
-    subgraph "Core Classes"
-        H[Astronaut.h/cpp]
-        I[Debris.h/cpp]
-        J[Ship.h/cpp]
-        K[GameState.h/cpp]
-        L[PhysicsEngine.h/cpp]
+    subgraph "Core Components"
+        H[Astronaut.hpp]
+        I[Obstacle.hpp]
+        J[Goal.hpp]
+        K[AudioManager.hpp]
+        L[Constants.h]
     end
     
-    subgraph "Data Flow"
-        M[User Input SPACE]
-        N[Astronaut State]
-        O[Physics Update]
-        P[Collision Detection]
-        Q[Screen Render]
+    subgraph "Physics Engine (main.cpp + Headers)"
+        M[Inertial Linear Velocity]
+        N[Decoupled Angular Velocity]
+        O[Rotational Impulse Resolution]
+        P[Tangential Friction Transfer]
         
-        M -->|Lock Rotation| N
-        N -->|Position/Velocity| O
-        O -->|Apply Forces| N
-        N --> P
-        I --> P
-        P -->|Bounce| N
-        N --> Q
-        I --> Q
-        J --> Q
+        M -->|State| H
+        N -->|State| H
+        O -->|Collision Response| H
+        P -->|Torque Application| I
     end
-    
-    B --> H
-    C --> L
-    D --> L
-    H --> N
-    I --> P
-    L --> O
+
+    subgraph "Procedural Visuals"
+        Q[Dynamic Thruster Plasma]
+        R[Layered Alpha Flickering]
+        S[Health-linked Chroma]
+        
+        Q -->|Rendering| H
+        R -->|Animation| H
+        S -->|State Driven| H
+    end
 ```
