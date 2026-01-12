@@ -29,6 +29,21 @@ The core of this game is a custom 2D physics engine built on top of SFML:
 
 *Created with love, bit of physics, and a healthy fear of the vacuum.*
 
+## Media
+
+### Launch Screen
+![Launch Screen](assets/documentation/launchscreen.png)
+
+### In-Game Action
+![Game Play Screen](assets/documentation/game_play_screen.png)
+
+### Mission Failure
+![Game Lost Screen](assets/documentation/gamelost.png)
+
+### Gameplay Walkthrough
+*assets/documentation/gameplay.mp4*
+![Gameplay Video](assets/documentation/gameplay.mp4)
+
 ## Architecture
 ```mermaid
 graph TB
